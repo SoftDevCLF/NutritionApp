@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -5,11 +6,18 @@ matplotlib.use('Agg') # must be before pyplot for cloud deployment
 import seaborn as sns
 import io
 import base64
+from azure.storage.blob import BlobServiceClient
+
+AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
+CONTAINER_NAME = "nutrition-data"
+BLOB_NAME = "All_Diets.csv"
 
 # Load the dataset
 def load_data():
-    # Handle missing data (fill missing values with mean)
-    df = pd.read_csv("All_Diets.csv")
+    blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+    blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=BLOB_NAME)
+    blob_data = blob_client.download_blob().readall()
+    df = pd.read_csv(io.BytesIO(blob_data))
     df['Protein(g)'] = df['Protein(g)'].fillna(df['Protein(g)'].mean())
     df['Carbs(g)'] = df['Carbs(g)'].fillna(df['Carbs(g)'].mean())
     df['Fat(g)'] = df['Fat(g)'].fillna(df['Fat(g)'].mean())
