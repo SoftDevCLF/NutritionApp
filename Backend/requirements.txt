@@ -4,3 +4,6 @@ pandas
 matplotlib
 seaborn
 psutil
+azure-storage-blob
+azure-identity
+azure-mgmt-storage
